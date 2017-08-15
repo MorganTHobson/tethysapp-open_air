@@ -1,5 +1,5 @@
 from tethys_sdk.base import TethysAppBase, url_map_maker
-
+from tethys_sdk.app_settings import PersistentStoreDatabaseSetting
 
 class OpenAir(TethysAppBase):
     """
@@ -32,3 +32,18 @@ class OpenAir(TethysAppBase):
         )
 
         return url_maps
+
+    def persistent_store_settings(self):
+        """
+        Define Persistent Store Settings.
+        """
+        ps_settings = (
+            PersistentStoreDatabaseSetting(
+                name='sensor_db',
+                description='sensor database',
+                initializer='open_air.model.init_sensor_db',
+                required=True
+            ),
+        )
+
+        return ps_settings

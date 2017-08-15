@@ -1,74 +1,93 @@
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
-from tethys_sdk.gizmos import Button
+from tethys_sdk.gizmos import MapView, MVView, MVLayer
+
+from .model import get_all_sensors
 
 @login_required()
 def home(request):
     """
     Controller for the app home page.
     """
-    save_button = Button(
-        display_text='',
-        name='save-button',
-        icon='glyphicon glyphicon-floppy-disk',
-        style='success',
-        attributes={
-            'data-toggle':'tooltip',
-            'data-placement':'top',
-            'title':'Save'
+    # Get list of sensors and create sensors MVLayer:
+    sensors = get_all_sensors()
+    features = []
+    lat_list = []
+    lng_list = []
+
+    for sensor in sensors:
+        lat_list.append(sensor.latitude)
+        lng_list.append(sensor.longitude)
+
+        sensor_feature = {
+            'type': 'Feature',
+            'geometry': {
+                'type': 'Point',
+                'coordinates': [sensor.longitude, sensor.latitude]
+            },
+            'properties': {
+                'id': sensor.id,
+                'timest': sensor.updatets
+            }
         }
+        features.append(sensor_feature)
+
+    # Define GeoJSON FeatureCollection
+    sensors_feature_collection = {
+        'type': 'FeatureCollection',
+        'crs': {
+            'type': 'name',
+            'properties': {
+                'name': 'EPSG:4326'
+            }
+        },
+        'features': features
+    }
+
+    # Create a Map View Layer
+    sensors_layer = MVLayer(
+        source='GeoJSON',
+        options=sensors_feature_collection,
+        legend_title='Sensors',
+        layer_options={
+            'style': {
+                'image': {
+                    'circle': {
+                        'radius': 10,
+                        'fill': {'color':  '#d84e1f'},
+                        'stroke': {'color': '#ffffff', 'width': 1},
+                    }
+                }
+            }
+        },
+        feature_selection=True
     )
 
-    edit_button = Button(
-        display_text='',
-        name='edit-button',
-        icon='glyphicon glyphicon-edit',
-        style='warning',
-        attributes={
-            'data-toggle':'tooltip',
-            'data-placement':'top',
-            'title':'Edit'
-        }
+
+    # Define view centered on sensor locations
+    try:
+        view_center = [sum(lng_list) / float(len(lng_list)), sum(lat_list) / float(len(lat_list))]
+    except ZeroDivisionError:
+        view_center = [-98.6, 39.8]
+
+    view_options = MVView(
+        projection='EPSG:4326',
+        center=view_center,
+        zoom=4.5,
+        maxZoom=18,
+        minZoom=2
     )
 
-    remove_button = Button(
-        display_text='',
-        name='remove-button',
-        icon='glyphicon glyphicon-remove',
-        style='danger',
-        attributes={
-            'data-toggle':'tooltip',
-            'data-placement':'top',
-            'title':'Remove'
-        }
-    )
-
-    previous_button = Button(
-        display_text='Previous',
-        name='previous-button',
-        attributes={
-            'data-toggle':'tooltip',
-            'data-placement':'top',
-            'title':'Previous'
-        }
-    )
-
-    next_button = Button(
-        display_text='Next',
-        name='next-button',
-        attributes={
-            'data-toggle':'tooltip',
-            'data-placement':'top',
-            'title':'Next'
-        }
+    sensor_map = MapView(
+        height='100%',
+        width='100%',
+        layers=[sensors_layer],
+        basemap='OpenStreetMap',
+        view=view_options
     )
 
     context = {
-        'save_button': save_button,
-        'edit_button': edit_button,
-        'remove_button': remove_button,
-        'previous_button': previous_button,
-        'next_button': next_button
+        'sensor_map': sensor_map,
     }
 
     return render(request, 'open_air/home.html', context)
