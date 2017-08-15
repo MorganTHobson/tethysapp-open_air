@@ -1,7 +1,7 @@
 import json
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, Float, String
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy import Column, Integer, Float, String, ForeignKey
+from sqlalchemy.orm import sessionmaker, relationship
 
 from .app import OpenAir as app
 
@@ -20,6 +20,41 @@ class Sensor(Base):
     latitude = Column(Float)
     longitude = Column(Float)
     updatets = Column(String)
+
+    # Relationships
+    temperature_graph = relationship('TemperatureGraph', back_populates='sensor', uselist=False)
+
+
+class TemperatureGraph(Base):
+    """
+    SQLAlchemy Temperature Graph DB Model
+    """
+    __tablename__ = 'temperature_graphs'
+
+    # Columns
+    id = Column(Integer, primary_key=True)
+    sensor_id = Column(ForeignKey('sensors.id'))
+
+    # Relationships
+    sensor = relationship('Sensor', back_populates='temperature_graph')
+    points = relationship('TemperaturePoint', back_populates='temperature_graph')
+
+
+class TemperaturePoint(Base):
+    """
+    SQLAlchemy Temperature Point DB Model
+    """
+    __tablename__ = 'temperature_points'
+
+    # Columns
+    id = Column(Integer, primary_key=True)
+    temperature_graph_id = Column(ForeignKey('temperature_graphs.id'))
+    time = Column(Integer)  #: minutes
+    temperature = Column(Float)  #: fahrenheit, maybe
+
+    # Relationships
+    temperature_graph = relationship('TemperatureGraph', back_populates='points')
+
 
 def get_all_sensors():
     """
