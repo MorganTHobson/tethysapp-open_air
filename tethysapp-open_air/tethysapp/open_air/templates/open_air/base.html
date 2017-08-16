@@ -13,8 +13,11 @@
 {% block app_title %}{{ tethys_app.name }}{% endblock %}
 
 {% block app_navigation_items %}
+  {% url 'open_air:home' as home_url %}
+  {% url 'open_air:sensors' as list_sensors_url %}
   <li class="title">Navigation</li>
-  <li class="active"><a href="">Home</a></li>
+  <li class="{% if request.path == home_url %}active{% endif %}"><a href="{{ home_url }}">Home</a></li>
+  <li class="{% if request.path == list_sensors_url %}active{% endif %}"><a href="{{ list_sensors_url }}">Sensors</a></li>
 {% endblock %}
 
 {% block app_content %}

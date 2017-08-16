@@ -11,7 +11,7 @@ class OpenAir(TethysAppBase):
     icon = 'open_air/images/icon.gif'
     package = 'open_air'
     root_url = 'open-air'
-    color = '#b9d0f3'
+    color = '#7fffd4'
     description = 'Front end sensor monitoring'
     tags = 'air quality'
     enable_feedback = False
@@ -28,6 +28,11 @@ class OpenAir(TethysAppBase):
                 name='home',
                 url='open-air',
                 controller='open_air.controllers.home'
+            ),
+            UrlMap(
+                name='sensors',
+                url='open-air/sensors',
+                controller='open_air.controllers.list_sensors'
             ),
         )
 

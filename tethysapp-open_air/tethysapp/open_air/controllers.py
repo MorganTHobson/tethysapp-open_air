@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
-from tethys_sdk.gizmos import MapView, MVView, MVLayer
+from tethys_sdk.gizmos import MapView, MVView, MVLayer, DataTableView
 
 from .model import get_all_sensors
 
@@ -91,3 +91,32 @@ def home(request):
     }
 
     return render(request, 'open_air/home.html', context)
+
+@login_required()
+def list_sensors(request):
+    """
+    Show all Sensors in a table
+    """
+    sensors = get_all_sensors()
+    table_rows = []
+
+    for sensor in sensors:
+        table_rows.append(
+            (
+                sensor.id, sensor.longitude, sensor.latitude
+            )
+        )
+
+    sensor_table = DataTableView(
+        column_names = ('id', 'latitude', 'longitude'),
+        rows = table_rows,
+        searching = False,
+        orderClasses = False,
+        lengthMenu=[ [10, 25, 50, -1], [10, 25, 50, "All"] ]
+    )
+
+    context = {
+        'sensor_table' : sensor_table
+    }
+
+    return render(request, 'open_air/list_sensors.html', context)
