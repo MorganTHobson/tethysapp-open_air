@@ -1,9 +1,13 @@
 import json
+import boto3
+import decimal
+from boto3.dynamodb.conditions import Key, Attr
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, Float, String, ForeignKey
 from sqlalchemy.orm import sessionmaker, relationship
 
 from .app import OpenAir as app
+
 
 Base = declarative_base()
 
@@ -92,6 +96,49 @@ def init_sensor_db(engine, first_time):
             )
             session.add(sensor)
 
-        # Add the dams to the session, commit, and close
+        # Add the sensors to the session, commit, and close
         session.commit()
         session.close()
+
+def update_sensor(sensor_id):
+    """
+    Update the graph data of a particular sensor
+    """
+
+    try:
+
+        Session = app.get_persistent_store_database('sensor_db', as_sessionmaker=True)
+        session = Session()
+
+        # Get sensor object
+        sensor = session.query(Sensor).get(int(sensor_id))
+        temperature_graph = sensor.temperature_graph
+
+        # Create graphs if none exist
+        if not temperature_graph:
+            temperature_graph = TemperatureGraph()
+            sensor.temperature_graph = temperature_graph
+
+        temperature_points = temperature_graph.points
+
+        # Get DynamoDB table
+        dynamodb = boto3.resource('dynamodb')
+        table = dynamodb.Table('ESP8266AWSDemo') # Remember to update table here
+
+        response = table.query(
+            KeyConditionExpression=Key('id').eq(sensor_id) & Key('timest').gt(sensor.updatets)
+        )
+
+        # Extract points from table response
+        for entry in response['Items']:
+            temperature_points.append(TemperaturePoint(time = entry['timest'], temperature = entry['temp']))
+
+        # Wrap up db session
+        session.commit()
+        session.close()
+
+    except Exception as e:
+        print(e)
+        return False
+
+    return True

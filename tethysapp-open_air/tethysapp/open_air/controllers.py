@@ -53,7 +53,7 @@ def home(request):
             'style': {
                 'image': {
                     'circle': {
-                        'radius': 10,
+                        'radius': 8,
                         'fill': {'color':  '#d84e1f'},
                         'stroke': {'color': '#ffffff', 'width': 1},
                     }
