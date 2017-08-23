@@ -1,8 +1,11 @@
-from django.shortcuts import render
+from django.shortcuts import render, reverse, redirect
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from tethys_sdk.gizmos import MapView, MVView, MVLayer, DataTableView
+from tethys_sdk.gizmos import MapView, MVView, MVLayer, DataTableView, SelectInput, Button
 
-from .model import get_all_sensors
+from .model import get_all_sensors, Sensor
+from .model import update_sensor as updatesensor
+from .app import OpenAir as app
 
 @login_required()
 def home(request):
@@ -103,12 +106,12 @@ def list_sensors(request):
     for sensor in sensors:
         table_rows.append(
             (
-                sensor.id, sensor.longitude, sensor.latitude
+                sensor.id, sensor.longitude, sensor.latitude, sensor.updatets
             )
         )
 
     sensor_table = DataTableView(
-        column_names = ('id', 'latitude', 'longitude'),
+        column_names = ('id', 'latitude', 'longitude', 'update time'),
         rows = table_rows,
         searching = False,
         orderClasses = False,
@@ -120,3 +123,74 @@ def list_sensors(request):
     }
 
     return render(request, 'open_air/list_sensors.html', context)
+
+@login_required()
+def update_sensor(request):
+    """
+    Controller for Update Sensor page
+    """
+    # Get sensors from database
+    Session = app.get_persistent_store_database('sensor_db', as_sessionmaker=True)
+    session = Session()
+    all_sensors = session.query(Sensor).all()
+
+    # Defaults
+    sensor_select_options = [(sensor.id, sensor.id) for sensor in all_sensors]
+    selected_sensor = None
+
+    # Errors
+    sensor_select_errors = ''
+
+    if request.POST and 'update-button' in request.POST:
+        has_errors = False
+        selected_sensor = request.POST.get('sensor-select', None)
+
+        if not selected_sensor:
+            has_errors = True
+            sensor_select_errors = 'Sensor is required.'
+
+        if not has_errors:
+            success = updatesensor(selected_sensor)
+
+            # Provide feedback
+            if success:
+                messages.info(request, 'Successfully updated sensor')
+            else:
+                messages.info(request, 'Unable to update sensor')
+            return redirect(reverse('open_air:home'))
+
+        messages.error(request, "Please fix errors")
+
+    sensor_select_input = SelectInput(
+        display_text='Sensor',
+        name='sensor-select',
+        multiple=False,
+        options=sensor_select_options,
+        initial=selected_sensor,
+        error=sensor_select_errors
+    )
+
+    update_button = Button(
+        display_text='Update',
+        name='update-button',
+        icon='glyphicon glyphicon-plus',
+        style='success',
+        attributes={'form': 'update-sensor-form'},
+        submit=True
+    )
+
+    cancel_button = Button(
+        display_text='Cancel',
+        name='cancel-button',
+        href=reverse('dam_inventory:home')
+    )
+
+    context = {
+        'sensor_select_input': sensor_select_input,
+        'update_button': update_button,
+        'cancel_button': cancel_button,
+    }
+
+    session.close()
+
+    return render(request, 'open_air/update_sensors.html', context)

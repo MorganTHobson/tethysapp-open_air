@@ -123,15 +123,18 @@ def update_sensor(sensor_id):
 
         # Get DynamoDB table
         dynamodb = boto3.resource('dynamodb')
-        table = dynamodb.Table('ESP8266AWSDemo') # Remember to update table here
+        table = dynamodb.Table('TethysTestData') # Remember to update table here
 
         response = table.query(
-            KeyConditionExpression=Key('id').eq(sensor_id) & Key('timest').gt(sensor.updatets)
+            KeyConditionExpression=Key('id').eq(int(sensor.id)) & Key('timest').gt(int(sensor.updatets))
         )
 
         # Extract points from table response
         for entry in response['Items']:
-            temperature_points.append(TemperaturePoint(time = entry['timest'], temperature = entry['temp']))
+            temperature_points.append(TemperaturePoint(time = int(entry['timest']), temperature = int(entry['temp'])))
+            # Update time stamp
+            if int(entry['timest']) > int(sensor.updatets):
+                sensor.updatets = entry['timest']
 
         # Wrap up db session
         session.commit()

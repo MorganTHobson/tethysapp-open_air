@@ -34,6 +34,11 @@ class OpenAir(TethysAppBase):
                 url='open-air/sensors',
                 controller='open_air.controllers.list_sensors'
             ),
+            UrlMap(
+                name='update_sensor',
+                url='open-air/sensors/update',
+                controller='open_air.controllers.update_sensor'
+            ),
         )
 
         return url_maps
