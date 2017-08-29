@@ -2,12 +2,21 @@
 {% load tethys_gizmos %}
 {% load tethys_gizmos staticfiles %}
 
+{% block import_gizmos %}
+  {% import_gizmo_dependency plotly_view %}
+{% endblock %}
 
 {% block app_content %}
   {% gizmo sensor_map %}
+  <div id="popup"></div>
 {% endblock %}
 
 {% block styles %}
     {{ block.super }}
     <link href="{% static 'open_air/css/map.css' %}" rel="stylesheet"/>
+{% endblock %}
+
+{% block scripts %}
+  {{ block.super }}
+  <script src="{% static 'open_air/js/map.js' %}" type="text/javascript"></script>
 {% endblock %}

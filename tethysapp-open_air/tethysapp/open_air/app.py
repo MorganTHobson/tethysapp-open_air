@@ -39,6 +39,16 @@ class OpenAir(TethysAppBase):
                 url='open-air/sensors/update',
                 controller='open_air.controllers.update_sensor'
             ),
+            UrlMap(
+                name='graphs',
+                url='open-air/graphs/{temperature_graph_id}',
+                controller='open_air.controllers.temperature_graph'
+            ),
+            UrlMap(
+                name='graphs_ajax',
+                url='open-air/graphs/{sensor_id}/ajax',
+                controller='open_air.controllers.graphs_ajax'
+            )
         )
 
         return url_maps

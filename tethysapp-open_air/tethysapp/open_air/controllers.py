@@ -6,6 +6,8 @@ from tethys_sdk.gizmos import MapView, MVView, MVLayer, DataTableView, SelectInp
 from .model import get_all_sensors, Sensor
 from .model import update_sensor as updatesensor
 from .app import OpenAir as app
+from .helpers import create_temperature_graph
+
 
 @login_required()
 def home(request):
@@ -30,7 +32,9 @@ def home(request):
             },
             'properties': {
                 'id': sensor.id,
-                'timest': sensor.updatets
+                'timest': sensor.updatets,
+                'latitude': sensor.latitude,
+                'longitude': sensor.longitude
             }
         }
         features.append(sensor_feature)
@@ -182,7 +186,7 @@ def update_sensor(request):
     cancel_button = Button(
         display_text='Cancel',
         name='cancel-button',
-        href=reverse('dam_inventory:home')
+        href=reverse('open_air:home')
     )
 
     context = {
@@ -194,3 +198,38 @@ def update_sensor(request):
     session.close()
 
     return render(request, 'open_air/update_sensors.html', context)
+
+
+@login_required()
+def temperature_graph(request, temperature_graph_id):
+    """
+    Controller for the temperature graph page.
+    """
+    temperature_graph_plot = create_temperature_graph(temperature_graph_id)
+
+    context = {
+        'temperature_graph_plot': temperature_graph_plot,
+    }
+    return render(request, 'open_air/graphs.html', context)
+
+@login_required()
+def graphs_ajax(request, sensor_id):
+    """
+    Controller for the graphs ajax page.
+    """
+    # Get sensors from database
+    Session = app.get_persistent_store_database('sensor_db', as_sessionmaker=True)
+    session = Session()
+    sensor = session.query(Sensor).get(int(sensor_id))
+
+    if sensor.temperature_graph:
+        temperature_graph_plot = create_temperature_graph(sensor.temperature_graph.id, height='300px')
+    else:
+        temperature_graph_plot = None
+
+    context = {
+        'temperature_graph_plot': temperature_graph_plot,
+    }
+
+    session.close()
+    return render(request, 'open_air/graphs_ajax.html', context)
