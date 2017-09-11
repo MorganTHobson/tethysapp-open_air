@@ -1,0 +1,12 @@
+{% extends "open_air/base.html" %}
+{% load tethys_gizmos %}
+
+{% block app_navigation_items %}
+  <li class="title">App Navigation</li>
+  <li class=""><a href="{% url 'open_air:sensors' %}">Back</a></li>
+{% endblock %}
+
+{% block app_content %}
+  {% gizmo temperature_graph_plot %}
+{% endblock %}
+
