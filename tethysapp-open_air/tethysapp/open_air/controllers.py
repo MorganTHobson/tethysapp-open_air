@@ -217,6 +217,10 @@ def graphs_ajax(request, sensor_id):
     """
     Controller for the graphs ajax page.
     """
+    # Update sensor before viewing
+    if not updatesensor(sensor_id):
+        messages.info(request, 'Unable to update sensor')
+
     # Get sensors from database
     Session = app.get_persistent_store_database('sensor_db', as_sessionmaker=True)
     session = Session()

@@ -3,8 +3,9 @@ import boto3
 import decimal
 from boto3.dynamodb.conditions import Key, Attr
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, Float, String, ForeignKey
+from sqlalchemy import Column, Integer, Float, String, ForeignKey, DateTime
 from sqlalchemy.orm import sessionmaker, relationship
+from datetime import datetime
 
 from .app import OpenAir as app
 
@@ -23,7 +24,7 @@ class Sensor(Base):
     id = Column(Integer, primary_key=True)
     latitude = Column(Float)
     longitude = Column(Float)
-    updatets = Column(String)
+    updatets = Column(DateTime)
 
     # Relationships
     temperature_graph = relationship('TemperatureGraph', back_populates='sensor', uselist=False)
@@ -53,7 +54,7 @@ class TemperaturePoint(Base):
     # Columns
     id = Column(Integer, primary_key=True)
     temperature_graph_id = Column(ForeignKey('temperature_graphs.id'))
-    time = Column(Integer)  #: minutes
+    time = Column(DateTime)  #: generic python datetime object
     temperature = Column(Float)  #: fahrenheit, maybe
 
     # Relationships
