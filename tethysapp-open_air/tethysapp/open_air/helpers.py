@@ -3,7 +3,6 @@ from tethys_gizmos.gizmo_options import PlotlyView
 
 from tethysapp.open_air.app import OpenAir as app
 from tethysapp.open_air.model import TemperatureGraph
-from datetime import datetime
 
 def create_temperature_graph(temperature_graph_id, height='520px', width='100%'):
     """
@@ -17,7 +16,7 @@ def create_temperature_graph(temperature_graph_id, height='520px', width='100%')
     time = []
     temp = []
     for point in temperature_graph.points:
-        time.append(point.time)
+        time.append(point.time.hour)
         temp.append(point.temperature)
 
     # Build up Plotly plot
@@ -38,20 +37,3 @@ def create_temperature_graph(temperature_graph_id, height='520px', width='100%')
     session.close()
     return temperature_graph_plot
 
-def str2datetime(time_string):
-    year = int(time_string[0:4])
-    month = int(time_string[4:6])
-    day = int(time_string[6:8])
-    hour = int(time_string[8:10])
-    minute = int(time_string[10:12])
-    second = int(time_string[12:14])
-    return datetime(year=year, month=month, day=day, hour=hour, minute=minute, second=second)
-
-def datetime2str(dt):
-    time_string = str(dt.year)
-    time_string += str(dt.month)
-    time_string += str(dt.day)
-    time_string += str(dt.hour)
-    time_string += str(dt.minute)
-    time_string += str(dt.second)
-    return time_string

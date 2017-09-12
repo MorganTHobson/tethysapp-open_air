@@ -8,7 +8,7 @@ from sqlalchemy.orm import sessionmaker, relationship
 from datetime import datetime
 
 from .app import OpenAir as app
-
+from .conversion_helpers import datetime2str, str2datetime
 
 Base = declarative_base()
 
@@ -93,7 +93,7 @@ def init_sensor_db(engine, first_time):
                 id = i,
                 latitude = 5 * i,
                 longitude = -5 * i,
-                updatets = 0
+                updatets = datetime(0, 0, 0)
             )
             session.add(sensor)
 
@@ -127,15 +127,15 @@ def update_sensor(sensor_id):
         table = dynamodb.Table('TethysTestData') # Remember to update table here
 
         response = table.query(
-            KeyConditionExpression=Key('id').eq(int(sensor.id)) & Key('timest').gt(int(sensor.updatets))
+            KeyConditionExpression=Key('id').eq(int(sensor.id)) & Key('timest').gt(int(datetime2str(sensor.updatets)))
         )
 
         # Extract points from table response
         for entry in response['Items']:
-            temperature_points.append(TemperaturePoint(time = int(entry['timest']), temperature = int(entry['temp'])))
+            temperature_points.append(TemperaturePoint(time = str2datetime(entry['timest'])), temperature = float(entry['temp']))
             # Update time stamp
-            if int(entry['timest']) > int(sensor.updatets):
-                sensor.updatets = entry['timest']
+            if int(entry['timest']) > int(datetime2str(sensor.updatets)):
+                sensor.updatets = str2datetime(entry['timest'])
 
         # Wrap up db session
         session.commit()
