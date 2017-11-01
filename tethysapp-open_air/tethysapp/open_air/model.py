@@ -25,6 +25,7 @@ class Sensor(Base):
     latitude = Column(Float)
     longitude = Column(Float)
     updatets = Column(DateTime)
+    group = Column(String)
 
     # Relationships
     temperature_graph = relationship('TemperatureGraph', back_populates='sensor', uselist=False)
@@ -69,7 +70,13 @@ def get_all_sensors():
     session = Session()
 
     # Query for all sensor records
+    #sensors = session.query(Sensor).filter(Sensor.group == 'dev')
     sensors = session.query(Sensor).all()
+    for sensor in sensors:
+        session.remove(sensor)
+    return
+
+    session.commit()
     session.close()
 
     return sensors
@@ -86,16 +93,6 @@ def init_sensor_db(engine, first_time):
         # Make session
         Session = sessionmaker(bind=engine)
         session = Session()
-
-        # Initialize database with all sensors
-        for i in range(1, 11):
-            sensor = Sensor(
-                id = i,
-                latitude = 5 * i,
-                longitude = -5 * i,
-                updatets = datetime(0, 0, 0)
-            )
-            session.add(sensor)
 
         # Add the sensors to the session, commit, and close
         session.commit()
@@ -119,6 +116,7 @@ def update_sensor(sensor_id):
         if not temperature_graph:
             temperature_graph = TemperatureGraph()
             sensor.temperature_graph = temperature_graph
+
 
         temperature_points = temperature_graph.points
 

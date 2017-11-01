@@ -20,24 +20,25 @@ def home(request):
     lat_list = []
     lng_list = []
 
-    for sensor in sensors:
-        lat_list.append(sensor.latitude)
-        lng_list.append(sensor.longitude)
+    if sensors is not None:
+        for sensor in sensors:
+            lat_list.append(sensor.latitude)
+            lng_list.append(sensor.longitude)
 
-        sensor_feature = {
-            'type': 'Feature',
-            'geometry': {
-                'type': 'Point',
-                'coordinates': [sensor.longitude, sensor.latitude]
-            },
-            'properties': {
-                'id': sensor.id,
-                'timest': sensor.updatets,
-                'latitude': sensor.latitude,
-                'longitude': sensor.longitude
+            sensor_feature = {
+                'type': 'Feature',
+                'geometry': {
+                    'type': 'Point',
+                    'coordinates': [sensor.longitude, sensor.latitude]
+                },
+                'properties': {
+                    'id': sensor.id,
+                    'timest': sensor.updatets,
+                    'latitude': sensor.latitude,
+                    'longitude': sensor.longitude
+                }
             }
-        }
-        features.append(sensor_feature)
+            features.append(sensor_feature)
 
     # Define GeoJSON FeatureCollection
     sensors_feature_collection = {
@@ -107,12 +108,13 @@ def list_sensors(request):
     sensors = get_all_sensors()
     table_rows = []
 
-    for sensor in sensors:
-        table_rows.append(
-            (
-                sensor.id, sensor.longitude, sensor.latitude, sensor.updatets
+    if sensors is not None:
+        for sensor in sensors:
+            table_rows.append(
+                (
+                    sensor.id, sensor.longitude, sensor.latitude, sensor.updatets
+                )
             )
-        )
 
     sensor_table = DataTableView(
         column_names = ('id', 'latitude', 'longitude', 'update time'),
@@ -205,6 +207,11 @@ def temperature_graph(request, temperature_graph_id):
     """
     Controller for the temperature graph page.
     """
+
+    # Update sensor before viewing
+    if not updatesensor(sensor_id):
+        messages.info(request, 'Unable to update sensor')
+
     temperature_graph_plot = create_temperature_graph(temperature_graph_id)
 
     context = {
