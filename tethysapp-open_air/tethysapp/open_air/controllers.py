@@ -1,7 +1,7 @@
 from django.shortcuts import render, reverse, redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from tethys_sdk.gizmos import MapView, MVView, MVLayer, DataTableView, SelectInput, Button
+from tethys_sdk.gizmos import MapView, MVView, MVLayer, DataTableView, TextInput, Button
 
 from .model import get_all_sensors, Sensor
 from .model import update_sensor as updatesensor
@@ -141,7 +141,6 @@ def update_sensor(request):
     all_sensors = session.query(Sensor).all()
 
     # Defaults
-    sensor_select_options = [(sensor.id, sensor.id) for sensor in all_sensors]
     selected_sensor = None
 
     # Errors
@@ -167,11 +166,9 @@ def update_sensor(request):
 
         messages.error(request, "Please fix errors")
 
-    sensor_select_input = SelectInput(
+    sensor_select_input = TextInput(
         display_text='Sensor',
         name='sensor-select',
-        multiple=False,
-        options=sensor_select_options,
         initial=selected_sensor,
         error=sensor_select_errors
     )

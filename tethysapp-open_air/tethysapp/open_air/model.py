@@ -1,6 +1,8 @@
 import json
 import boto3
 import decimal
+import pandas as pd
+import numpy as np
 from boto3.dynamodb.conditions import Key, Attr
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, Float, String, ForeignKey, DateTime
@@ -25,7 +27,6 @@ class Sensor(Base):
     latitude = Column(Float)
     longitude = Column(Float)
     updatets = Column(DateTime)
-    group = Column(String)
 
     # Relationships
     temperature_graph = relationship('TemperatureGraph', back_populates='sensor', uselist=False)
@@ -72,12 +73,9 @@ def get_all_sensors():
     # Query for all sensor records
     #sensors = session.query(Sensor).filter(Sensor.group == 'dev')
     sensors = session.query(Sensor).all()
-    for sensor in sensors:
-        session.remove(sensor)
-    return
 
-    session.commit()
-    session.close()
+    #session.commit()
+    #session.close()
 
     return sensors
 
@@ -93,6 +91,19 @@ def init_sensor_db(engine, first_time):
         # Make session
         Session = sessionmaker(bind=engine)
         session = Session()
+
+        df = pd.read_csv('/home/mhobson5/tethysapp-open_air/tethysapp-open_air/tethysapp/open_air/data.csv')
+        df = df[['id', 'Location:Latitude', 'Location:Longitude']].dropna()
+        df = df.set_index('id', drop=False).drop_duplicates().drop('28')
+        
+        for index, row in df.iterrows():
+            sensor = Sensor(
+                id = row['id'],
+                latitude = row['Location:Latitude'],
+                longitude = row['Location:Longitude'],
+                updatets = datetime(1, 1, 1)
+            )
+            session.add(sensor)
 
         # Add the sensors to the session, commit, and close
         session.commit()
@@ -110,6 +121,10 @@ def update_sensor(sensor_id):
 
         # Get sensor object
         sensor = session.query(Sensor).get(int(sensor_id))
+
+        if sensor is None:
+            sensor = Sensor(id=sensor_id, updatets=datetime(year=1, month=1, day=1))
+
         temperature_graph = sensor.temperature_graph
 
         # Create graphs if none exist
