@@ -26,7 +26,6 @@ class Sensor(Base):
     id = Column(Integer, primary_key=True)
     latitude = Column(Float)
     longitude = Column(Float)
-    updatets = Column(DateTime)
 
     # Relationships
     temperature_graph = relationship('TemperatureGraph', back_populates='sensor', uselist=False)
@@ -42,6 +41,7 @@ class OzoneGraph(Base):
     # Columns
     id = Column(Integer, primary_key=True)
     sensor_id = Column(ForeignKey('sensors.id'))
+    updatets = Column(DateTime)
 
     # Relationships
     sensor = relationship('Sensor', back_populates='ozone_graph')
@@ -56,6 +56,7 @@ class TemperatureGraph(Base):
     # Columns
     id = Column(Integer, primary_key=True)
     sensor_id = Column(ForeignKey('sensors.id'))
+    updatets = Column(DateTime)
 
     # Relationships
     sensor = relationship('Sensor', back_populates='temperature_graph')
@@ -128,8 +129,7 @@ def init_sensor_db(engine, first_time):
             sensor = Sensor(
                 id = row['id'],
                 latitude = row['Location:Latitude'],
-                longitude = row['Location:Longitude'],
-                updatets = datetime(1, 1, 1)
+                longitude = row['Location:Longitude']
             )
             session.add(sensor)
 
@@ -150,11 +150,11 @@ def update_sensor(sensor_id):
         # Get sensor object
         sensor = session.query(Sensor).get(int(sensor_id))
 
-        temperature_graph = sensor.temperature_graph
+        ozone_graph = sensor.ozone_graph
 
         # Create graphs if none exist
-        if not temperature_graph:
-            ozone_graph = OzoneGraph()
+        if not ozone_graph:
+            ozone_graph = OzoneGraph(updatets = datetime(1, 1, 1))
             sensor.ozone_graph = ozone_graph
 
 
@@ -167,8 +167,9 @@ def update_sensor(sensor_id):
         
         for index, row in df.iterrows():
             time = datetime(year=int(index[:4]), month=int(index[5:7]), day=int(index[8:10]), hour=int(index[11:13]))
-            #TODO check against sensor.updatets
-            ozone_points.append(OzonePoint(time=time, ppb = float(row[str(sensor_id)])))
+            if time > ozone_graph.updatets:
+                ozone_points.append(OzonePoint(time=time, ppb = float(row[str(sensor_id)])))
+                ozone_graph.updatets = time
 
         ## Get DynamoDB table
         #idynamodb = boto3.resource('dynamodb')

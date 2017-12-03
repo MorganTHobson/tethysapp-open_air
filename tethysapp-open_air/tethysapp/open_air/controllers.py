@@ -33,7 +33,6 @@ def home(request):
                 },
                 'properties': {
                     'id': sensor.id,
-                    'timest': sensor.updatets,
                     'latitude': sensor.latitude,
                     'longitude': sensor.longitude
                 }
@@ -112,12 +111,12 @@ def list_sensors(request):
         for sensor in sensors:
             table_rows.append(
                 (
-                    sensor.id, sensor.longitude, sensor.latitude, sensor.updatets
+                    sensor.id, sensor.longitude, sensor.latitude
                 )
             )
 
     sensor_table = DataTableView(
-        column_names = ('id', 'latitude', 'longitude', 'update time'),
+        column_names = ('id', 'latitude', 'longitude'),
         rows = table_rows,
         searching = False,
         orderClasses = False,
