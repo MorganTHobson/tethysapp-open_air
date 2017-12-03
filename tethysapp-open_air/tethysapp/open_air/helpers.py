@@ -48,14 +48,17 @@ def create_ozone_graph(ozone_graph_id, height='520px', width='100%'):
     sensor = ozone_graph.sensor
     time = []
     ppb = []
+    error = []
     for point in ozone_graph.points:
         time.append(point.time)
         ppb.append(point.ppb)
+        error.append(15)
 
     # Build up Plotly plot
     ozone_graph_go = go.Scatter(
         x=time,
         y=ppb,
+        error_y = dict(type='data', array=error, visible=True),
         name='Ozone Graph for Sensor {0}'.format(sensor.id),
         line={'color': '#0080ff', 'width': 4, 'shape': 'spline'},
     )
