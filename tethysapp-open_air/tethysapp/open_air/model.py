@@ -14,6 +14,8 @@ from .conversion_helpers import datetime2str, str2datetime
 
 Base = declarative_base()
 
+data_file = 'data.csv'
+callibrated_file = 'callibrated.csv'
 
 # SQLAlchemy ORM definition for the sensor table
 class Sensor(Base):
@@ -121,7 +123,7 @@ def init_sensor_db(engine, first_time):
         Session = sessionmaker(bind=engine)
         session = Session()
 
-        df = pd.read_csv('/home/mhobson5/tethysapp-open_air/tethysapp-open_air/tethysapp/open_air/data.csv')
+        df = pd.read_csv(data_file)
         df = df[['id', 'Location:Latitude', 'Location:Longitude']].dropna()
         df = df.set_index('id', drop=False).drop_duplicates().drop('28')
         
@@ -161,7 +163,7 @@ def update_sensor(sensor_id):
         ozone_points = ozone_graph.points
 
 
-        df = pd.read_csv('/home/mhobson5/tethysapp-open_air/tethysapp-open_air/tethysapp/open_air/callibrated.csv')
+        df = pd.read_csv(callibrated_file)
         df = df[['time', str(sensor_id)]].dropna()
         df = df.set_index('time', drop=False).drop_duplicates()
         
