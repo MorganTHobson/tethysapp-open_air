@@ -28,10 +28,11 @@ def datetime2str(dt):
     if len(second) == 1:
         second = "0" + second
 
+
     time_string = year
     time_string += month
     time_string += day
-    time_string += minute
+    time_string += hour
     time_string += minute
     time_string += second
     return time_string

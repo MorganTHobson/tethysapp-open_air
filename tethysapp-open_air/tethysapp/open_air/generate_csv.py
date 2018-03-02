@@ -11,11 +11,10 @@ def generate_csv():
     # Get DynamoDB table
     dynamodb = bt.resource('dynamodb')
     table = dynamodb.Table('BaltimoreOpenAir2017') # Remember to update table here
-    cutoff = datetime2str(datetime.now() - timedelta(days=7))
+    cutoff = datetime2str(datetime.now() - timedelta(days=30))
     print(cutoff)
-    response = table.query(
-        KeyConditionExpression=Key('id').eq('24') & Key('timest').gt(int(cutoff))
-    )
+    fe = Key('id').eq('17') & Key('timest').gt(int(cutoff))
+    response = table.query(KeyConditionExpression=fe)
 
     i = 0
 
