@@ -11,9 +11,10 @@ def generate_csv():
     # Get DynamoDB table
     dynamodb = bt.resource('dynamodb')
     table = dynamodb.Table('BaltimoreOpenAir2017') # Remember to update table here
-
+    cutoff = datetime2str(datetime.now() - timedelta(days=7))
+    print(cutoff)
     response = table.query(
-        KeyConditionExpression=Key('id').eq('24') & Key('timest').gt(int(datetime2str(datetime.now() - timedelta(days=7))))
+        KeyConditionExpression=Key('id').eq('24') & Key('timest').gt(int(cutoff))
     )
 
     i = 0
@@ -39,8 +40,9 @@ def generate_csv():
                'temp3':[entry['temp3']]}
         df2 = pd.DataFrame(data=row)
         df.loc[i]=row
-        print(df)
         i = i+1
+
+    print(df)
 
     df.to_csv(path_or_buf='test.csv')
 

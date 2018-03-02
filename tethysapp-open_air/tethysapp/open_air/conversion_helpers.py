@@ -10,10 +10,28 @@ def str2datetime(time_string):
     return datetime(year=year_, month=month_, day=day_, hour=hour_, minute=minute_, second=second_)
 
 def datetime2str(dt):
-    time_string = str(dt.year)
-    time_string += str(dt.month)
-    time_string += str(dt.day)
-    time_string += str(dt.hour)
-    time_string += str(dt.minute)
-    time_string += str(dt.second)
+    year = str(dt.year)
+    month = str(dt.month)
+    day = str(dt.day)
+    hour = str(dt.hour)
+    minute = str(dt.minute)
+    second = str(dt.second)
+
+    if len(month) == 1:
+        month = "0" + month
+    if len(day) == 1:
+        day = "0" + day
+    if len(hour) == 1:
+        hour = "0" + hour
+    if len(minute) == 1:
+        minute = "0" + minute
+    if len(second) == 1:
+        second = "0" + second
+
+    time_string = year
+    time_string += month
+    time_string += day
+    time_string += minute
+    time_string += minute
+    time_string += second
     return time_string
