@@ -6,7 +6,7 @@ from tethys_sdk.gizmos import MapView, MVView, MVLayer, DataTableView, TextInput
 from .model import get_all_sensors, Sensor
 from .model import update_sensor as updatesensor
 from .app import OpenAir as app
-from .helpers import create_temperature_graph, create_ozone_graph
+from .helpers import create_temperature_graph, create_ozone_graph, create_no2_graph
 
 
 @login_required()
@@ -239,9 +239,15 @@ def graphs_ajax(request, sensor_id):
     else:
         ozone_graph_plot = None
 
+    if sensor.no2_graph:
+        no2_graph_plot = create_no2_graph(sensor.no2_graph.id, height='300px')
+    else:
+        no2_graph_plot = None
+
     context = {
         'temperature_graph_plot': temperature_graph_plot,
         'ozone_graph_plot': ozone_graph_plot,
+        'no2_graph_plot': no2_graph_plot,
     }
 
     session.close()

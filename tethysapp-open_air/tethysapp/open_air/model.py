@@ -9,8 +9,10 @@ from sqlalchemy import Column, Integer, Float, String, ForeignKey, DateTime
 from sqlalchemy.orm import sessionmaker, relationship
 from datetime import datetime
 
+
 from .app import OpenAir as app
 from .conversion_helpers import datetime2str, str2datetime
+from .dynamo_pull import pull_db
 
 Base = declarative_base()
 
@@ -32,6 +34,7 @@ class Sensor(Base):
     # Relationships
     temperature_graph = relationship('TemperatureGraph', back_populates='sensor', uselist=False)
     ozone_graph = relationship('OzoneGraph', back_populates='sensor', uselist=False)
+    no2_graph = relationship('NO2Graph', back_populates='sensor', uselist=False)
 
 
 class OzoneGraph(Base):
@@ -48,6 +51,21 @@ class OzoneGraph(Base):
     # Relationships
     sensor = relationship('Sensor', back_populates='ozone_graph')
     points = relationship('OzonePoint', back_populates='ozone_graph')
+
+class NO2Graph(Base):
+    """
+    SQLAlchemy NO2 Graph DB Model
+    """
+    __tablename__ = 'no2_graphs'
+
+    # Columns
+    id = Column(Integer, primary_key=True)
+    sensor_id = Column(ForeignKey('sensors.id'))
+    updatets = Column(DateTime)
+
+    # Relationships
+    sensor = relationship('Sensor', back_populates='no2_graph')
+    points = relationship('NO2Point', back_populates='no2_graph')
 
 class TemperatureGraph(Base):
     """
@@ -75,9 +93,26 @@ class OzonePoint(Base):
     ozone_graph_id = Column(ForeignKey('ozone_graphs.id'))
     time = Column(DateTime)  #: generic python datetime object
     ppb = Column(Float) #: parts per billion
+    std = Column(Float) #: Standard deviation
 
     # Relationships
     ozone_graph = relationship('OzoneGraph', back_populates='points')
+
+class NO2Point(Base):
+    """
+    SQLAlchemy Ozone Point DB Model
+    """
+    __tablename__ = 'no2_points'
+
+    # Columns
+    id = Column(Integer, primary_key=True)
+    no2_graph_id = Column(ForeignKey('no2_graphs.id'))
+    time = Column(DateTime)  #: generic python datetime object
+    ppb = Column(Float) #: parts per billion
+    std = Column(Float) #: Standard deviation
+
+    # Relationships
+    no2_graph = relationship('NO2Graph', back_populates='points')
 
 class TemperaturePoint(Base):
     """
@@ -104,6 +139,7 @@ def get_all_sensors():
 
     # Query for all sensor records
     sensors = session.query(Sensor).all()
+
 
     #session.commit()
     #session.close()
@@ -153,40 +189,33 @@ def update_sensor(sensor_id):
         sensor = session.query(Sensor).get(int(sensor_id))
 
         ozone_graph = sensor.ozone_graph
+        no2_graph = sensor.no2_graph
 
         # Create graphs if none exist
         if not ozone_graph:
             ozone_graph = OzoneGraph(updatets = datetime(1, 1, 1))
             sensor.ozone_graph = ozone_graph
+        if not no2_graph:
+            no2_graph = NO2Graph(updatets = datetime(1, 1, 1))
+            sensor.no2_graph = no2_graph
 
 
         ozone_points = ozone_graph.points
+        no2_points = no2_graph.points
 
 
-        df = pd.read_csv(callibrated_file)
-        df = df[['time', str(sensor_id)]].dropna()
-        df = df.set_index('time', drop=False).drop_duplicates()
+        df = pull_db(sensor_id, 30)
         
+
         for index, row in df.iterrows():
-            time = datetime(year=int(index[:4]), month=int(index[5:7]), day=int(index[8:10]), hour=int(index[11:13]))
+            time = str2datetime(str(row["timest"][0]))
             if time > ozone_graph.updatets:
-                ozone_points.append(OzonePoint(time=time, ppb = float(row[str(sensor_id)])))
+                ozone_points.append(OzonePoint(time=time, ppb = float(row["O3_avg"][0]), std = float(row["O3_std"][0])))
                 ozone_graph.updatets = time
+            if time > no2_graph.updatets:
+                no2_points.append(NO2Point(time=time, ppb = float(row["NO2_avg"][0]), std = float(row["NO2_std"][0])))
+                no2_graph.updatets = time
 
-        ## Get DynamoDB table
-        #idynamodb = boto3.resource('dynamodb')
-        #table = dynamodb.Table('TethysTestData') # Remember to update table here
-
-        #response = table.query(
-        #    KeyConditionExpression=Key('id').eq(int(sensor.id)) & Key('timest').gt(int(datetime2str(sensor.updatets)))
-        #)
-
-        # Extract points from table response
-        #for entry in response['Items']:
-        #    temperature_points.append(TemperaturePoint(time = str2datetime(entry['timest'])), temperature = float(entry['temp']))
-        #    # Update time stamp
-        #    if int(entry['timest']) > int(datetime2str(sensor.updatets)):
-        #        sensor.updatets = str2datetime(entry['timest'])
 
         # Wrap up db session
         session.commit()
