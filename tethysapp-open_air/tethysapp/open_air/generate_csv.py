@@ -4,16 +4,16 @@ from datetime import datetime, timedelta
 from boto3.dynamodb.conditions import Key, Attr
 from conversion_helpers import datetime2str
 
-def generate_csv():
+def generate_csv(sensorid, days):
     # DataFrame
     df = pd.DataFrame(columns=['id','timest','H2S_avg','H2S_std','NO2_avg','NO2_std','O3_avg','O3_std','SO2_avg','SO2_std','battAV','hum1','hum2','hum3','temp1','temp2','temp3'])
 
     # Get DynamoDB table
     dynamodb = bt.resource('dynamodb')
     table = dynamodb.Table('BaltimoreOpenAir2017') # Remember to update table here
-    cutoff = datetime2str(datetime.now() - timedelta(days=30))
+    cutoff = datetime2str(datetime.now() - timedelta(days=days))
     print(cutoff)
-    fe = Key('id').eq('17') & Key('timest').gt(int(cutoff))
+    fe = Key('id').eq(str(sensorid)) & Key('timest').gt(int(cutoff))
     response = table.query(KeyConditionExpression=fe)
 
     i = 0
@@ -46,4 +46,4 @@ def generate_csv():
     df.to_csv(path_or_buf='test.csv')
 
 
-generate_csv()
+generate_csv(17,30)
