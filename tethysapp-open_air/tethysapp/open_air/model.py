@@ -30,6 +30,8 @@ class Sensor(Base):
     id = Column(Integer, primary_key=True)
     latitude = Column(Float)
     longitude = Column(Float)
+    m_o3 = Column(Float)
+    m_no2 = Column(Float)
 
     # Relationships
     temperature_graph = relationship('TemperatureGraph', back_populates='sensor', uselist=False)
@@ -160,14 +162,17 @@ def init_sensor_db(engine, first_time):
         session = Session()
 
         df = pd.read_csv(data_file)
-        df = df[['id', 'Location:Latitude', 'Location:Longitude']].dropna()
-        df = df.set_index('id', drop=False).drop_duplicates().drop('28')
+        df = df[['id', 'Location:Latitude', 'Location:Longitude', 'qr_ozone', 'qr_no2']].dropna()
+        #df = df.set_index('id', drop=False).drop_duplicates().drop('28')
+        df = df.set_index('id', drop=False).drop_duplicates()
         
         for index, row in df.iterrows():
             sensor = Sensor(
                 id = row['id'],
                 latitude = row['Location:Latitude'],
-                longitude = row['Location:Longitude']
+                longitude = row['Location:Longitude'],
+                m_o3 = float(row['qr_ozone']),
+                m_no2 = float(row['qr_no2'])
             )
             session.add(sensor)
 
@@ -210,10 +215,10 @@ def update_sensor(sensor_id):
         for index, row in df.iterrows():
             time = str2datetime(str(row["timest"][0]))
             if time > ozone_graph.updatets:
-                ozone_points.append(OzonePoint(time=time, ppb = float(row["O3_avg"][0]), std = float(row["O3_std"][0])))
+                ozone_points.append(OzonePoint(time=time, ppb = float(row["O3_avg"][0])/sensor.m_o3, std = float(row["O3_std"][0])))
                 ozone_graph.updatets = time
             if time > no2_graph.updatets:
-                no2_points.append(NO2Point(time=time, ppb = float(row["NO2_avg"][0]), std = float(row["NO2_std"][0])))
+                no2_points.append(NO2Point(time=time, ppb = float(row["NO2_avg"][0])/sensor.m_no2, std = float(row["NO2_std"][0])))
                 no2_graph.updatets = time
 
 
