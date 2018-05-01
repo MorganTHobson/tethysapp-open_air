@@ -171,8 +171,8 @@ def init_sensor_db(engine, first_time):
                 id = row['id'],
                 latitude = row['Location:Latitude'],
                 longitude = row['Location:Longitude'],
-                m_o3 = float(row['qr_ozone']),
-                m_no2 = float(row['qr_no2'])
+                m_o3 = float(row['qr_ozone'].rsplit(" ", 1)[1]),
+                m_no2 = float(row['qr_no2'].rsplit(" ", 1)[1])
             )
             session.add(sensor)
 
