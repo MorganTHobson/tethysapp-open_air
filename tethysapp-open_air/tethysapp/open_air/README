@@ -1,0 +1,19 @@
+START SERVER
+--
+start tethys environment (if not already started)
+$ t
+
+start up tethys server on specified doman and port
+$ tethys manage start -p ec2-18-236-42-36.us-west-2.compute.amazonaws.com:8000
+
+RESET DATABASE
+--
+If you ever want to make changes to the structure of the database beyond new
+entries (ie. adding, removing fields), after making desired changes to
+model.py:
+
+start tethys environment (if not already started)
+$ t
+
+wipe and initialize new database. will subsequently pull from dynamodb
+$ tethys syncstores -r open_air
