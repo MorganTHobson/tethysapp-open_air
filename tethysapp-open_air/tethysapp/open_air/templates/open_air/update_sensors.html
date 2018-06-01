@@ -2,15 +2,6 @@
 {% load tethys_gizmos %}
 
 {% block app_content %}
-  <h2>Update Sensors</h2>
-  <form id="update-sensor-form" method="post" enctype="multipart/form-data">
-    {% csrf_token %}
-    {% gizmo sensor_select_input %}
-  </form>
+  <h2>User Guide</h2>
 {% endblock %}
 
-
-{% block app_actions %}
-  {% gizmo cancel_button %}
-  {% gizmo update_button %}
-{% endblock %}

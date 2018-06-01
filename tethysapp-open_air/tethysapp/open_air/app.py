@@ -48,6 +48,11 @@ class OpenAir(TethysAppBase):
                 name='graphs_ajax',
                 url='open-air/graphs/{sensor_id}/ajax',
                 controller='open_air.controllers.graphs_ajax'
+            ),
+            UrlMap(
+                name='user_guide',
+                url='open-air/user-guide',
+                controller='open_air.controllers.user_guide'
             )
         )
 

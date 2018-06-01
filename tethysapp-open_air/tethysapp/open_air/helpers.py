@@ -60,7 +60,6 @@ def create_ozone_graph(ozone_graph_id, height='520px', width='100%'):
     ozone_graph_go = go.Scatter(
         x=time,
         y=ppb,
-        error_y = dict(type='data', array=error, visible=True),
         name='Ozone Graph for Sensor {0}'.format(sensor.id),
         mode='markers',
         marker={'color': '#0080ff', 'size': 10},
@@ -69,7 +68,7 @@ def create_ozone_graph(ozone_graph_id, height='520px', width='100%'):
     layout = {
         'title': 'Ozone Graph for Sensor {0}'.format(sensor.id),
         'xaxis': {'title': 'Time',
-                  'range': [min(time), max(time)]},
+                  'range': [max(time) - timedelta(days=7), max(time)]},
         'yaxis': {'title': 'ppb'},
     }
     figure = {'data': data, 'layout': layout}
@@ -98,7 +97,6 @@ def create_no2_graph(no2_graph_id, height='520px', width='100%'):
     no2_graph_go = go.Scatter(
         x=time,
         y=ppb,
-        error_y = dict(type='data', array=error, visible=True),
         name='NO2 Graph for Sensor {0}'.format(sensor.id),
         mode='markers',
         marker={'color': '#0080ff', 'size': 10},
@@ -107,7 +105,7 @@ def create_no2_graph(no2_graph_id, height='520px', width='100%'):
     layout = {
         'title': 'NO2 Graph for Sensor {0}'.format(sensor.id),
         'xaxis': {'title': 'Time',
-                  'range': [min(time), max(time)]},
+                  'range': [max(time) - timedelta(days=7), max(time)]},
         'yaxis': {'title': 'ppb'},
     }
     figure = {'data': data, 'layout': layout}
@@ -136,7 +134,6 @@ def create_h2s_graph(h2s_graph_id, height='520px', width='100%'):
     h2s_graph_go = go.Scatter(
         x=time,
         y=ppb,
-        error_y = dict(type='data', array=error, visible=True),
         name='H2S Graph for Sensor {0}'.format(sensor.id),
         mode='markers',
         marker={'color': '#0080ff', 'size': 10},
@@ -145,7 +142,7 @@ def create_h2s_graph(h2s_graph_id, height='520px', width='100%'):
     layout = {
         'title': 'H2S Graph for Sensor {0}'.format(sensor.id),
         'xaxis': {'title': 'Time',
-                  'range': [min(time), max(time)]},
+                  'range': [max(time) - timedelta(days=7), max(time)]},
         'yaxis': {'title': 'ppb'},
     }
     figure = {'data': data, 'layout': layout}
@@ -174,7 +171,6 @@ def create_so2_graph(so2_graph_id, height='520px', width='100%'):
     so2_graph_go = go.Scatter(
         x=time,
         y=ppb,
-        error_y = dict(type='data', array=error, visible=True),
         name='SO2 Graph for Sensor {0}'.format(sensor.id),
         mode='markers',
         marker={'color': '#0080ff', 'size': 10},
@@ -183,7 +179,7 @@ def create_so2_graph(so2_graph_id, height='520px', width='100%'):
     layout = {
         'title': 'SO2 Graph for Sensor {0}'.format(sensor.id),
         'xaxis': {'title': 'Time',
-                  'range': [min(time), max(time)]},
+                  'range': [max(time) - timedelta(days=7), max(time)]},
         'yaxis': {'title': 'ppb'},
     }
     figure = {'data': data, 'layout': layout}

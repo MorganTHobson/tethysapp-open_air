@@ -16,8 +16,10 @@ from .dynamo_pull import pull_db
 
 Base = declarative_base()
 
-data_file = 'data.csv'
-callibrated_file = 'callibrated.csv'
+loc_file = 'BaltimoreOpenAir2018_results.csv'
+cal_file = 'WxCubeAQSensors2018_results.csv'
+
+#callibrated_file = 'callibrated.csv'
 
 # SQLAlchemy ORM definition for the sensor table
 class Sensor(Base):
@@ -227,20 +229,26 @@ def init_sensor_db(engine, first_time):
         Session = sessionmaker(bind=engine)
         session = Session()
 
-        df = pd.read_csv(data_file)
-        df = df[['id', 'Location:Latitude', 'Location:Longitude', 'qr_ozone', 'qr_no2', 'qr_h2s', 'qr_so2']].dropna()
-        #df = df.set_index('id', drop=False).drop_duplicates().drop('28')
-        df = df.set_index('id', drop=False).drop_duplicates()
-        
+        df_loc = pd.read_csv(loc_file)
+        df_loc = df_loc[['id', 'Location:Latitude', 'Location:Longitude']].dropna()
+        df_loc = df_loc.set_index('id', drop=True).drop_duplicates()
+
+        df_cal = pd.read_csv(cal_file)
+        df_cal = df_cal[['id', 'qr_ozone', 'qr_no2', 'qr_h2s', 'qr_so2']].dropna()
+        df_cal = df_cal.set_index('id', drop=False).drop_duplicates()
+
+        df = pd.concat([df_loc, df_cal], axis=1, join='inner')
+
+
         for index, row in df.iterrows():
             sensor = Sensor(
                 id = row['id'],
                 latitude = row['Location:Latitude'],
                 longitude = row['Location:Longitude'],
-                m_o3 = abs(float(row['qr_ozone'].rsplit(" ", 1)[1])),
-                m_no2 = abs(float(row['qr_no2'].rsplit(" ", 1)[1])),
-                m_h2s = abs(float(row['qr_h2s'].rsplit(" ", 1)[1])),
-                m_so2 = abs(float(row['qr_so2'].rsplit(" ", 1)[1]))
+                m_o3 = float(row['qr_ozone'].rsplit(" ", 1)[1]),
+                m_no2 = float(row['qr_no2'].rsplit(" ", 1)[1]),
+                m_h2s = float(row['qr_h2s'].rsplit(" ", 1)[1]),
+                m_so2 = float(row['qr_so2'].rsplit(" ", 1)[1])
             )
             session.add(sensor)
 

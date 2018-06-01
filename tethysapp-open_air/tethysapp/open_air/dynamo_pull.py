@@ -10,7 +10,7 @@ def pull_db(sensorid, days, cutoff):
 
     # Get DynamoDB table
     dynamodb = bt.resource('dynamodb', region_name='us-west-2')
-    table = dynamodb.Table('BaltimoreOpenAir2017') # Remember to update table here
+    table = dynamodb.Table('BaltimoreOpenAir2018') # Remember to update table here
     #cutoff = datetime2str(datetime.now() - timedelta(days=days))
     fe = Key('id').eq(str(sensorid)) & Key('timest').gt(int(cutoff))
     response = table.query(KeyConditionExpression=fe)

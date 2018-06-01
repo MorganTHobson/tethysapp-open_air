@@ -197,23 +197,14 @@ def update_sensor(request):
 
     return render(request, 'open_air/update_sensors.html', context)
 
-
 @login_required()
-def temperature_graph(request, temperature_graph_id):
+def user_guide(request):
     """
-    Controller for the temperature graph page.
+    Guide for site usage.
     """
 
-    # Update sensor before viewing
-    if not updatesensor(sensor_id):
-        messages.info(request, 'Unable to update sensor')
-
-    temperature_graph_plot = create_temperature_graph(temperature_graph_id)
-
-    context = {
-        'temperature_graph_plot': temperature_graph_plot,
-    }
-    return render(request, 'open_air/graphs.html', context)
+    context = {}
+    return render(request, 'open_air/user_guide.html', context)
 
 @login_required()
 def graphs_ajax(request, sensor_id):
@@ -264,3 +255,20 @@ def graphs_ajax(request, sensor_id):
 
     session.close()
     return render(request, 'open_air/graphs_ajax.html', context)
+
+@login_required()
+def temperature_graph(request, temperature_graph_id):
+    """
+    Controller for the temperature graph page.
+    """
+
+    # Update sensor before viewing
+    if not updatesensor(sensor_id):
+        messages.info(request, 'Unable to update sensor')
+
+    temperature_graph_plot = create_temperature_graph(temperature_graph_id)
+
+    context = {
+        'temperature_graph_plot': temperature_graph_plot,
+    }
+    return render(request, 'open_air/graphs.html', context)
