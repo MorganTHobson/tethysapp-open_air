@@ -4,14 +4,14 @@ from datetime import datetime, timedelta
 from boto3.dynamodb.conditions import Key, Attr
 from conversion_helpers import datetime2str
 
-def pull_db(sensorid, days):
+def pull_db(sensorid, days, cutoff):
     # DataFrame
     df = pd.DataFrame(columns=['id','timest','H2S_avg','H2S_std','NO2_avg','NO2_std','O3_avg','O3_std','SO2_avg','SO2_std','battAV','hum1','hum2','hum3','temp1','temp2','temp3'])
 
     # Get DynamoDB table
     dynamodb = bt.resource('dynamodb', region_name='us-west-2')
-    table = dynamodb.Table('BaltimoreOpenAir2018') # Remember to update table here
-    cutoff = datetime2str(datetime.now() - timedelta(days=days))
+    table = dynamodb.Table('BaltimoreOpenAir2017') # Remember to update table here
+    #cutoff = datetime2str(datetime.now() - timedelta(days=days))
     fe = Key('id').eq(str(sensorid)) & Key('timest').gt(int(cutoff))
     response = table.query(KeyConditionExpression=fe)
 

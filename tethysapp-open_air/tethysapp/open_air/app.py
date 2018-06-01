@@ -11,7 +11,7 @@ class OpenAir(TethysAppBase):
     icon = 'open_air/images/icon.gif'
     package = 'open_air'
     root_url = 'open-air'
-    color = '#7fffd4'
+    color = '#42585b'
     description = 'Front end sensor monitoring'
     tags = 'air quality'
     enable_feedback = False

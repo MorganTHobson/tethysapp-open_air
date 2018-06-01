@@ -69,7 +69,7 @@ def create_ozone_graph(ozone_graph_id, height='520px', width='100%'):
     layout = {
         'title': 'Ozone Graph for Sensor {0}'.format(sensor.id),
         'xaxis': {'title': 'Time',
-                  'range': [max(time) - timedelta(days=30), max(time)]},
+                  'range': [min(time), max(time)]},
         'yaxis': {'title': 'ppb'},
     }
     figure = {'data': data, 'layout': layout}
@@ -100,13 +100,14 @@ def create_no2_graph(no2_graph_id, height='520px', width='100%'):
         y=ppb,
         error_y = dict(type='data', array=error, visible=True),
         name='NO2 Graph for Sensor {0}'.format(sensor.id),
-        line={'color': '#0080ff', 'width': 4, 'shape': 'spline'},
+        mode='markers',
+        marker={'color': '#0080ff', 'size': 10},
     )
     data = [no2_graph_go]
     layout = {
         'title': 'NO2 Graph for Sensor {0}'.format(sensor.id),
         'xaxis': {'title': 'Time',
-                  'range': [max(time) - timedelta(days=30), max(time)]},
+                  'range': [min(time), max(time)]},
         'yaxis': {'title': 'ppb'},
     }
     figure = {'data': data, 'layout': layout}
@@ -137,13 +138,14 @@ def create_h2s_graph(h2s_graph_id, height='520px', width='100%'):
         y=ppb,
         error_y = dict(type='data', array=error, visible=True),
         name='H2S Graph for Sensor {0}'.format(sensor.id),
-        line={'color': '#0080ff', 'width': 4, 'shape': 'spline'},
+        mode='markers',
+        marker={'color': '#0080ff', 'size': 10},
     )
     data = [h2s_graph_go]
     layout = {
         'title': 'H2S Graph for Sensor {0}'.format(sensor.id),
         'xaxis': {'title': 'Time',
-                  'range': [max(time) - timedelta(days=30), max(time)]},
+                  'range': [min(time), max(time)]},
         'yaxis': {'title': 'ppb'},
     }
     figure = {'data': data, 'layout': layout}
@@ -174,13 +176,14 @@ def create_so2_graph(so2_graph_id, height='520px', width='100%'):
         y=ppb,
         error_y = dict(type='data', array=error, visible=True),
         name='SO2 Graph for Sensor {0}'.format(sensor.id),
-        line={'color': '#0080ff', 'width': 4, 'shape': 'spline'},
+        mode='markers',
+        marker={'color': '#0080ff', 'size': 10},
     )
     data = [so2_graph_go]
     layout = {
         'title': 'SO2 Graph for Sensor {0}'.format(sensor.id),
         'xaxis': {'title': 'Time',
-                  'range': [max(time) - timedelta(days=30), max(time)]},
+                  'range': [min(time), max(time)]},
         'yaxis': {'title': 'ppb'},
     }
     figure = {'data': data, 'layout': layout}

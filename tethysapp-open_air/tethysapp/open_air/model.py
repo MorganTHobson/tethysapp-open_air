@@ -247,6 +247,8 @@ def init_sensor_db(engine, first_time):
         # Add the sensors to the session, commit, and close
         session.commit()
         session.close()
+        for index, row in df.iterrows():
+            update_sensor(row['id'])
 
 def update_sensor(sensor_id):
     """
@@ -268,16 +270,16 @@ def update_sensor(sensor_id):
 
         # Create graphs if none exist
         if not ozone_graph:
-            ozone_graph = OzoneGraph(updatets = datetime(1, 1, 1))
+            ozone_graph = OzoneGraph(updatets = datetime(2017, 1, 1))
             sensor.ozone_graph = ozone_graph
         if not no2_graph:
-            no2_graph = NO2Graph(updatets = datetime(1, 1, 1))
+            no2_graph = NO2Graph(updatets = datetime(2017, 1, 1))
             sensor.no2_graph = no2_graph
         if not h2s_graph:
-            h2s_graph = H2SGraph(updatets = datetime(1, 1, 1))
+            h2s_graph = H2SGraph(updatets = datetime(2017, 1, 1))
             sensor.h2s_graph = h2s_graph
         if not so2_graph:
-            so2_graph = SO2Graph(updatets = datetime(1, 1, 1))
+            so2_graph = SO2Graph(updatets = datetime(2017, 1, 1))
             sensor.so2_graph = so2_graph
 
 
@@ -287,7 +289,7 @@ def update_sensor(sensor_id):
         h2s_points = h2s_graph.points
 
 
-        df = pull_db(sensor_id, 30)
+        df = pull_db(sensor_id, 30, datetime2str(ozone_graph.updatets))
         
         ozone_newtimes = []
         no2_newtimes = []
@@ -297,17 +299,29 @@ def update_sensor(sensor_id):
         for index, row in df.iterrows():
             time = str2datetime(str(row["timest"][0]))
             if time > ozone_graph.updatets:
-                ozone_points.append(OzonePoint(time=time, ppb = float(row["O3_avg"][0])/sensor.m_o3, std = float(row["O3_std"][0])/sensor.m_o3))
-                ozone_newtimes.append(time)
+                try:
+                    ozone_points.append(OzonePoint(time=time, ppb = float(row["O3_avg"][0])/sensor.m_o3, std = float(row["O3_std"][0])/sensor.m_o3))
+                    ozone_newtimes.append(time)
+                except ValueError:
+                    print('Invalid O3 point')
             if time > no2_graph.updatets:
-                no2_points.append(NO2Point(time=time, ppb = float(row["NO2_avg"][0])/sensor.m_no2, std = float(row["NO2_std"][0])/sensor.m_no2))
-                no2_newtimes.append(time)
+                try:
+                    no2_points.append(NO2Point(time=time, ppb = float(row["NO2_avg"][0])/sensor.m_no2, std = float(row["NO2_std"][0])/sensor.m_no2))
+                    no2_newtimes.append(time)
+                except ValueError:
+                    print('Invalid NO2 point')
             if time > h2s_graph.updatets:
-                h2s_points.append(H2SPoint(time=time, ppb = float(row["H2S_avg"][0])/sensor.m_h2s, std = float(row["H2S_std"][0])/sensor.m_h2s))
-                h2s_newtimes.append(time)
+                try:
+                    h2s_points.append(H2SPoint(time=time, ppb = float(row["H2S_avg"][0])/sensor.m_h2s, std = float(row["H2S_std"][0])/sensor.m_h2s))
+                    h2s_newtimes.append(time)
+                except ValueError:
+                    print('Invalid H2S point')
             if time > so2_graph.updatets:
-                so2_points.append(SO2Point(time=time, ppb = float(row["SO2_avg"][0])/sensor.m_so2, std = float(row["SO2_std"][0])/sensor.m_so2))
-                so2_newtimes.append(time)
+                try:
+                    so2_points.append(SO2Point(time=time, ppb = float(row["SO2_avg"][0])/sensor.m_so2, std = float(row["SO2_std"][0])/sensor.m_so2))
+                    so2_newtimes.append(time)
+                except ValueError:
+                    print('Invalid SO2 point')
 
         if len(ozone_newtimes) != 0:
             ozone_graph.updatets = max(ozone_newtimes)

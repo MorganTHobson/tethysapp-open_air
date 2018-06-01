@@ -15,11 +15,9 @@
 {% block app_navigation_items %}
   {% url 'open_air:home' as home_url %}
   {% url 'open_air:sensors' as list_sensors_url %}
-  {% url 'open_air:update_sensor' as update_sensor_url %}
   <li class="title">Navigation</li>
   <li class="{% if request.path == home_url %}active{% endif %}"><a href="{{ home_url }}">Home</a></li>
   <li class="{% if request.path == list_sensors_url %}active{% endif %}"><a href="{{ list_sensors_url }}">Sensors</a></li>
-  <li class="{% if request.path == update_sensor_url %}active{% endif %}"><a href="{{ update_sensor_url }}">Update Sensor</a></li>
 {% endblock %}
 
 {% block app_content %}
