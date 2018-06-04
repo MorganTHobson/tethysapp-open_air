@@ -17,7 +17,7 @@ from .dynamo_pull import pull_db
 Base = declarative_base()
 
 loc_file = 'BaltimoreOpenAir2018_results.csv'
-cal_file = 'WxCubeAQSensors2018_results.csv'
+cal_file = 'zeroes.csv'
 
 #callibrated_file = 'callibrated.csv'
 
@@ -32,10 +32,16 @@ class Sensor(Base):
     id = Column(Integer, primary_key=True)
     latitude = Column(Float)
     longitude = Column(Float)
+
     m_o3 = Column(Float)
     m_no2 = Column(Float)
     m_h2s = Column(Float)
     m_so2 = Column(Float)
+
+    z_o3 = Column(Float)
+    z_no2 = Column(Float)
+    z_h2s = Column(Float)
+    z_so2 = Column(Float)
 
     # Relationships
     temperature_graph = relationship('TemperatureGraph', back_populates='sensor', uselist=False)
@@ -231,32 +237,32 @@ def init_sensor_db(engine, first_time):
 
         df_loc = pd.read_csv(loc_file)
         df_loc = df_loc[['id', 'Location:Latitude', 'Location:Longitude']].dropna()
-        df_loc = df_loc.set_index('id', drop=True).drop_duplicates()
+        df_loc = df_loc.set_index('id', drop=False).drop_duplicates()
 
-        df_cal = pd.read_csv(cal_file)
-        df_cal = df_cal[['id', 'qr_ozone', 'qr_no2', 'qr_h2s', 'qr_so2']].dropna()
-        df_cal = df_cal.set_index('id', drop=False).drop_duplicates()
+        df_cal = pd.read_csv(cal_file, index_col = 0, header = [0,1])  
 
-        df = pd.concat([df_loc, df_cal], axis=1, join='inner')
-
-
-        for index, row in df.iterrows():
+        for index, row in df_loc.iterrows():
+            id = int(row['id'])
             sensor = Sensor(
-                id = row['id'],
+                id = id,
                 latitude = row['Location:Latitude'],
                 longitude = row['Location:Longitude'],
-                m_o3 = float(row['qr_ozone'].rsplit(" ", 1)[1]),
-                m_no2 = float(row['qr_no2'].rsplit(" ", 1)[1]),
-                m_h2s = float(row['qr_h2s'].rsplit(" ", 1)[1]),
-                m_so2 = float(row['qr_so2'].rsplit(" ", 1)[1])
+                m_o3 = float(df_cal.loc[id,'O3_avg']['m']),
+                m_no2 = float(df_cal.loc[id,'NO2_avg']['m']),
+                m_h2s = float(1),
+                m_so2 = float(df_cal.loc[id,'SO2_avg']['m']),
+                z_o3 = float(df_cal.loc[id,'O3_avg']['zero']),
+                z_no2 = float(df_cal.loc[id,'NO2_avg']['zero']),
+                z_h2s = float(0),
+                z_so2 = float(df_cal.loc[id,'SO2_avg']['zero'])
             )
             session.add(sensor)
 
         # Add the sensors to the session, commit, and close
         session.commit()
         session.close()
-        for index, row in df.iterrows():
-            update_sensor(row['id'])
+        for index, row in df_loc.iterrows():
+            update_sensor(int(row['id']))
 
 def update_sensor(sensor_id):
     """
@@ -308,25 +314,36 @@ def update_sensor(sensor_id):
             time = str2datetime(str(row["timest"][0]))
             if time > ozone_graph.updatets:
                 try:
-                    ozone_points.append(OzonePoint(time=time, ppb = float(row["O3_avg"][0])/sensor.m_o3, std = float(row["O3_std"][0])/sensor.m_o3, ozone_graph=ozone_graph))
+                    ozone_points.append(OzonePoint(time=time,
+                                                   ppb = (float(row["O3_avg"][0]) + sensor.z_o3)/sensor.m_o3,
+                                                   std = float(row["O3_std"][0])/sensor.m_o3, ozone_graph=ozone_graph))
                     ozone_newtimes.append(time)
                 except ValueError:
                     print('Invalid O3 point')
             if time > no2_graph.updatets:
                 try:
-                    no2_points.append(NO2Point(time=time, ppb = float(row["NO2_avg"][0])/sensor.m_no2, std = float(row["NO2_std"][0])/sensor.m_no2, no2_graph=no2_graph))
+                    no2_points.append(NO2Point(time=time,
+                                               ppb = (float(row["NO2_avg"][0]) + sensor.z_no2)/sensor.m_no2,
+                                               std = float(row["NO2_std"][0])/sensor.m_no2,
+                                               no2_graph=no2_graph))
                     no2_newtimes.append(time)
                 except ValueError:
                     print('Invalid NO2 point')
             if time > h2s_graph.updatets:
                 try:
-                    h2s_points.append(H2SPoint(time=time, ppb = float(row["H2S_avg"][0])/sensor.m_h2s, std = float(row["H2S_std"][0])/sensor.m_h2s, h2s_graph=h2s_graph))
+                    h2s_points.append(H2SPoint(time=time,
+                                               ppb = (float(row["H2S_avg"][0]) + sensor.z_h2s)/sensor.m_h2s,
+                                               std = float(row["H2S_std"][0])/sensor.m_h2s,
+                                               h2s_graph=h2s_graph))
                     h2s_newtimes.append(time)
                 except ValueError:
                     print('Invalid H2S point')
             if time > so2_graph.updatets:
                 try:
-                    so2_points.append(SO2Point(time=time, ppb = float(row["SO2_avg"][0])/sensor.m_so2, std = float(row["SO2_std"][0])/sensor.m_so2, so2_graph=so2_graph))
+                    so2_points.append(SO2Point(time=time,
+                                               ppb = (float(row["SO2_avg"][0]) + sensor.z_so2)/sensor.m_so2,
+                                               std = float(row["SO2_std"][0])/sensor.m_so2,
+                                               so2_graph=so2_graph))
                     so2_newtimes.append(time)
                 except ValueError:
                     print('Invalid SO2 point')

@@ -2,6 +2,30 @@
 {% load tethys_gizmos %}
 
 {% block app_content %}
-  <h2>User Guide</h2>
-  <p>Hey, here's how you do things!</p>
+<h1><span style="font-weight: 400;">A guide to using our data</span></h1>
+<h2><span style="font-weight: 400;">Introduction</span></h2>
+<p><span style="font-weight: 400;">This website contains experimental, preliminary data on air quality in the Greater Baltimore Area. Data has been calibrated against MDE data for the period of May 15-May 20</span><span style="font-weight: 400;">th</span><span style="font-weight: 400;">, but very certainly contains errors. For example, this data may over-estimate pollutant concentrations on high-pollution days and under-estimate pollutant concentrations on low-pollution days. As the summer goes on, we'll get the data we need to help us inform corrections to our network, so expect changes.</span></p>
+<p></p>
+<p><span style="font-weight: 400;">Above all, </span><b>use this data your own risk</b><span style="font-weight: 400;">, and of course, if you have questions, get in touch at </span><a href="mailto:baltimoreopenair@gmail.com"><span style="font-weight: 400;">baltimoreopenair@gmail.com</span></a><span style="font-weight: 400;">. </span></p>
+<p></p>
+<h2><span style="font-weight: 400;">The Data</span></h2>
+<p><span style="font-weight: 400;">This data reports gas data in parts per billion, abbreviated as ppb. The EPA's 8-hour limit for ozone is 70 parts per billion or ppb, which means that in any eight hours, ozone should remain below 70ppb. As a rough rule of thumb, pollutant values under 30ppb or so are considered low and values from 30-60 are considered moderate. When values rise above 60 or 70ppb, health experts recommend that people with asthma, COPD, or respiratory conditions limit outdoor activities. You should always contact your medical provider for the most up to date health information, or check airnow.gov for the most accurate local information.</span></p>
+<p></p>
+<p><span style="font-weight: 400;">For NO2, another other gas that we measure, the EPA limits are 100ppb for one hour and for SO2, a third pollutant we measure,t he limit is 75ppb. You read the EPA standards here:</span><a href="https://www.epa.gov/criteria-air-pollutants/naaqs-table"> <span style="font-weight: 400;">https://www.epa.gov/criteria-air-pollutants/naaqs-table</span></a><span style="font-weight: 400;">.</span></p>
+<p></p>
+<p><span style="font-weight: 400;">You can read more about these air pollutants on the EPA's website at</span><a href="https://www.epa.gov/criteria-air-pollutants"> <span style="font-weight: 400;">https://www.epa.gov/criteria-air-pollutants</span></a><span style="font-weight: 400;">.</span></p>
+<h2><span style="font-weight: 400;">FAQs</span></h2>
+<p></p>
+<p><span style="font-weight: 400;">Q: What happens if the sensors are above the EPA thresholds?</span></p>
+<p><span style="font-weight: 400;">A: Currently, this is experimental data, so there may be discrepencies between the different methods. Our sensors may not provide accurate readings at all times. We encourage you to check the official air quality index at:</span><a href="https://airnow.gov/"> <span style="font-weight: 400;">https://airnow.gov/</span></a><span style="font-weight: 400;">. If you are interested in the official, calibrated dataset when we release it, please email us at </span><a href="mailto:baltimoreopenair@gmail.com"><span style="font-weight: 400;">baltimoreopenair@gmail.com</span></a><span style="font-weight: 400;"> with the subject line &ldquo;Data Request&rdquo;.</span></p>
+<p></p>
+<p><span style="font-weight: 400;">Q: How come my site isn't showing up?</span></p>
+<p><span style="font-weight: 400;">A: Your site may be down for a variety of reasons, including, but not limited to, angry bears, lack of sunlight, internal power failure, rust, disgruntled ex-roommates, or a weak WiFi connection.</span></p>
+<p></p>
+<p><span style="font-weight: 400;">Q: I wish I were on this map! How do I get to be a site host?</span></p>
+<p><span style="font-weight: 400;">A: We're not adding sites for this summer, unfortunately, but you can request one for the fall or a later date by emailing baltimoreopenair@gmail.com.</span></p>
+<p></p>
+<p><span style="font-weight: 400;">Q: How do I get a copy of the data?</span></p>
+<p><span style="font-weight: 400;">A: Right now, we haven't added a data download button. If you would like a copy of the data, please email baltimoreopenair@gmail.com with the subject line &ldquo;Data Request&rdquo;.</span></p>
+
 {% endblock %}
